@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html, body, #root {
+  height: 100%;
+  background: theme('colors.bg.deep');
+  color: rgba(255, 255, 255, 0.92);
+  font-family: theme('fontFamily.sans');
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background-image: theme('backgroundImage.aurora');
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar — subtle, premium */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+@layer components {
+  .glass {
+    @apply bg-glass backdrop-blur-xl border border-white/10 shadow-glass;
+  }
+  .glass-strong {
+    @apply backdrop-blur-2xl bg-white/[0.06] border border-white/15 shadow-deep;
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #fff 0%, theme('colors.aurora.violet') 60%, theme('colors.aurora.cyan') 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .ring-aurora {
+    box-shadow:
+      0 0 0 1px rgba(168, 85, 247, 0.4),
+      0 0 32px -4px rgba(168, 85, 247, 0.5),
+      0 0 64px -16px rgba(34, 211, 238, 0.4);
+  }
+  .display-italic {
+    font-family: theme('fontFamily.serif');
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .display-grotesk {
+    font-family: theme('fontFamily.display');
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+  }
+  .small-caps {
+    font-feature-settings: "smcp", "c2sc";
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .rule-line {
+    background: linear-gradient(90deg, transparent, rgba(244,235,217,0.35), transparent);
+    height: 1px;
+  }
+}
+
+@layer utilities {
+  .paper-grain {
+    background-image:
+      radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+      radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 24px 24px, 11px 11px;
+    background-position: 0 0, 6px 6px;
+  }
+}
+
+/* Noise overlay for premium texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
