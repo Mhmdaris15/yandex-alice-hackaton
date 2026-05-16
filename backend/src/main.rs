@@ -52,11 +52,24 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/health", get(|| async { "ok" }))
-        .route("/api/ai/chat",        post(routes::ai::chat))
-        .route("/api/ocr",            post(routes::ocr::analyze))
-        .route("/api/community/pulse", get(routes::community::pulse))
-        .route("/api/journey",         get(routes::journey::list))
-        .route("/ws/translate",        get(routes::translate::ws))
+        .route("/api/ai/chat",         post(routes::ai::chat))
+        .route("/api/ocr",             post(routes::ocr::analyze))
+        .route("/api/community/pulse",  get(routes::community::pulse))
+        .route("/api/journey",          get(routes::journey::list))
+        // Forum
+        .route("/api/forum/threads",
+            get(routes::forum::list).post(routes::forum::create))
+        .route("/api/forum/threads/:id",
+            get(routes::forum::detail))
+        .route("/api/forum/threads/:id/reply",
+            post(routes::forum::reply))
+        .route("/api/forum/translate", post(routes::forum::translate))
+        // Buddy
+        .route("/api/buddy/list",       get(routes::buddy::list))
+        .route("/api/buddy/:id",        get(routes::buddy::get))
+        .route("/api/buddy/:id/intro", post(routes::buddy::intro))
+        // WebSocket
+        .route("/ws/translate",         get(routes::translate::ws))
         .with_state(state)
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http());

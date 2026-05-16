@@ -9,9 +9,9 @@ gsap.registerPlugin(Draggable);
 
 const ACCENT_MAP: Record<JourneyAccent, { hex: string; glow: string }> = {
   violet: { hex: "#a855f7", glow: "rgba(168,85,247,0.5)" },
-  cyan:   { hex: "#22d3ee", glow: "rgba(34,211,238,0.5)" },
-  rose:   { hex: "#fb7185", glow: "rgba(251,113,133,0.5)" },
-  amber:  { hex: "#fbbf24", glow: "rgba(251,191,36,0.5)" }
+  cyan: { hex: "#22d3ee", glow: "rgba(34,211,238,0.5)" },
+  rose: { hex: "#fb7185", glow: "rgba(251,113,133,0.5)" },
+  amber: { hex: "#fbbf24", glow: "rgba(251,191,36,0.5)" }
 };
 
 export function SpatialTimeline() {
@@ -217,8 +217,8 @@ function labelDay(day: number) {
 
 function StatusPill({ status }: { status: JourneyNode["status"] }) {
   const styles = {
-    done:     "text-emerald-300 ring-emerald-400/30",
-    active:   "text-cinnabar ring-cinnabar/50",
+    done: "text-emerald-300 ring-emerald-400/30",
+    active: "text-cinnabar ring-cinnabar/50",
     upcoming: "text-cream/45 ring-cream/15"
   }[status];
   const label = { done: "complete", active: "in progress", upcoming: "upcoming" }[status];

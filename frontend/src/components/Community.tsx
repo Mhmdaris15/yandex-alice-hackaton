@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionIndex, CyrillicTag } from "@/landing/atoms";
+import { buddy as buddyApi, type Buddy } from "@/lib/api";
+import { ForumPanel } from "./ForumPanel";
+import { BuddyProfileModal } from "./BuddyProfileModal";
 
 interface Pulse {
   id: string;
@@ -11,31 +14,19 @@ interface Pulse {
   ageMin: number;
 }
 
-interface Buddy {
-  id: string;
-  name: string;
-  country: string;
-  university: string;
-  yearsInRussia: number;
-  langs: string[];
-  match: number;
-  online: boolean;
-  avatarSeed: string;
-}
-
 const PULSES: Pulse[] = [
-  { id: "p1", lat: 0.34, lon: 0.22, kind: "queue",   message: "MFTs Sokol — 3h queue right now",        ageMin: 12 },
-  { id: "p2", lat: 0.58, lon: 0.46, kind: "tip",     message: "Clinic on Tverskaya speaks English",     ageMin: 90 },
-  { id: "p3", lat: 0.72, lon: 0.71, kind: "warning", message: "Yandex Taxi surge after 23:00",          ageMin: 30 },
-  { id: "p4", lat: 0.18, lon: 0.62, kind: "tip",     message: "Cheap sim activation at Yota kiosk",     ageMin: 220 },
-  { id: "p5", lat: 0.45, lon: 0.32, kind: "queue",   message: "Bank Sber — short queue, 12 min",        ageMin: 4 },
+  { id: "p1", lat: 0.34, lon: 0.22, kind: "queue",   message: "MFTs Krasnogvardeysky — 3h queue right now", ageMin: 12 },
+  { id: "p2", lat: 0.58, lon: 0.46, kind: "tip",     message: "Clinic on Nevsky speaks English",            ageMin: 90 },
+  { id: "p3", lat: 0.72, lon: 0.71, kind: "warning", message: "Yandex Taxi surge after 23:00 in Petrogradka", ageMin: 30 },
+  { id: "p4", lat: 0.18, lon: 0.62, kind: "tip",     message: "Cheap sim activation at Yota kiosk · Pioneerskaya", ageMin: 220 },
+  { id: "p5", lat: 0.45, lon: 0.32, kind: "queue",   message: "T-Bank Vasileostrovskaya — short queue, 12 min", ageMin: 4 },
 ];
 
-const BUDDIES: Buddy[] = [
-  { id: "b1", name: "Aigerim K.", country: "Kazakhstan", university: "HSE",    yearsInRussia: 3, langs: ["RU","KZ","EN"], match: 0.94, online: true,  avatarSeed: "AK" },
-  { id: "b2", name: "Liu Wei",    country: "China",      university: "MGU",    yearsInRussia: 2, langs: ["RU","ZH","EN"], match: 0.81, online: false, avatarSeed: "LW" },
-  { id: "b3", name: "Hassan A.",  country: "Egypt",      university: "Bauman", yearsInRussia: 4, langs: ["RU","AR","EN"], match: 0.77, online: true,  avatarSeed: "HA" },
-  { id: "b4", name: "Sofía M.",   country: "Colombia",   university: "RUDN",   yearsInRussia: 1, langs: ["RU","ES","EN"], match: 0.69, online: true,  avatarSeed: "SM" }
+const FALLBACK_BUDDIES: Buddy[] = [
+  { id: "b1", name: "Aigerim K.", country: "Kazakhstan", country_code: "KZ", university: "HSE", years_in_russia: 3, langs: ["RU","KZ","EN"], interests: ["bureaucracy","notary","cooking"], neighborhood: "Petrogradskaya · SPb", bio: "Almaty → SPb 2022. Survived two migration renewals. Will walk you through your first FMS visit.", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=240", online: true, telegram: "https://t.me/aigerim_k", match_score: 0.94 },
+  { id: "b2", name: "Liu Wei",    country: "China",      country_code: "CN", university: "MGU", years_in_russia: 2, langs: ["RU","ZH","EN"], interests: ["banking","metro","food"], neighborhood: "Vasilievsky Island · SPb", bio: "Shanghai → SPb 2023.", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=240", online: false, telegram: "https://t.me/liu_wei_spb", match_score: 0.81 },
+  { id: "b3", name: "Hassan A.",  country: "Egypt",      country_code: "EG", university: "Bauman", years_in_russia: 4, langs: ["RU","AR","EN"], interests: ["medical","translation","mosque"], neighborhood: "Sportivnaya · SPb", bio: "Cairo → SPb 2021.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=240", online: true, telegram: "https://t.me/hassan_spb", whatsapp: "https://wa.me/79991234567", match_score: 0.77 },
+  { id: "b4", name: "Sofía M.",   country: "Colombia",   country_code: "CO", university: "RUDN", years_in_russia: 1, langs: ["RU","ES","EN"], interests: ["dorm life","yandex eda","language exchange"], neighborhood: "Vyazemsky · SPb", bio: "Bogotá → SPb 2024.", avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=240", online: true, telegram: "https://t.me/sofia_spb", match_score: 0.69 },
 ];
 
 const KIND_COLOR: Record<Pulse["kind"], string> = {
@@ -44,9 +35,17 @@ const KIND_COLOR: Record<Pulse["kind"], string> = {
   warning: "#d63b2c"
 };
 
+type Tab = "map" | "forum" | "buddy";
+
+const TABS: { id: Tab; label: string; n: string }[] = [
+  { id: "map",   label: "Live Map",    n: "01" },
+  { id: "forum", label: "Letters Wall", n: "02" },
+  { id: "buddy", label: "Buddy Match", n: "03" },
+];
+
 export function Community() {
   const [selected, setSelected] = useState<Pulse | null>(null);
-  const [tab, setTab] = useState<"map" | "buddy">("map");
+  const [tab, setTab] = useState<Tab>("map");
 
   return (
     <section className="relative">
@@ -59,8 +58,8 @@ export function Community() {
         </h1>
         <p className="mt-5 max-w-xl font-serif italic text-cream/65 text-base sm:text-lg leading-relaxed">
           Real-time tips, queue lengths, and warnings dropped by senior
-          students on the ground. Or get matched with a buddy from your
-          country who's already been there.
+          students on the ground. Open a letter on the wall, or get matched
+          with a buddy who's been here longer than you.
         </p>
         <div className="mt-4">
           <CyrillicTag>свои · подскажут · своим</CyrillicTag>
@@ -68,15 +67,15 @@ export function Community() {
       </header>
 
       <div className="relative z-10 mt-8 inline-flex border border-cream/15 bg-cream/[0.02] backdrop-blur-md rounded-full p-1">
-        {(["map","buddy"] as const).map((t, i) => (
+        {TABS.map((t) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={t.id}
+            onClick={() => setTab(t.id)}
             className={`relative px-5 py-2 small-caps text-[10px] rounded-full transition ${
-              tab === t ? "text-cream" : "text-cream/40 hover:text-cream/80"
+              tab === t.id ? "text-cream" : "text-cream/40 hover:text-cream/80"
             }`}
           >
-            {tab === t && (
+            {tab === t.id && (
               <motion.span
                 layoutId="comm-tab"
                 className="absolute inset-0 rounded-full bg-cinnabar"
@@ -84,15 +83,15 @@ export function Community() {
               />
             )}
             <span className="relative flex items-center gap-2">
-              <span className="font-mono opacity-65">0{i + 1}</span>
-              {t === "map" ? "Live Map" : "Buddy Match"}
+              <span className="font-mono opacity-65">{t.n}</span>
+              {t.label}
             </span>
           </button>
         ))}
       </div>
 
       <AnimatePresence mode="wait">
-        {tab === "map" ? (
+        {tab === "map" && (
           <motion.div
             key="map"
             initial={{ opacity: 0, y: 12 }}
@@ -103,7 +102,19 @@ export function Community() {
             <MapPanel pulses={PULSES} selected={selected} onSelect={setSelected} />
             <PulseList pulses={PULSES} selected={selected} onSelect={setSelected} />
           </motion.div>
-        ) : (
+        )}
+        {tab === "forum" && (
+          <motion.div
+            key="forum"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="relative z-10 mt-6"
+          >
+            <ForumPanel />
+          </motion.div>
+        )}
+        {tab === "buddy" && (
           <motion.div
             key="buddy"
             initial={{ opacity: 0, y: 12 }}
@@ -111,7 +122,7 @@ export function Community() {
             exit={{ opacity: 0, y: -8 }}
             className="relative z-10 mt-6"
           >
-            <BuddyMatch buddies={BUDDIES} />
+            <BuddyMatch />
           </motion.div>
         )}
       </AnimatePresence>
@@ -128,6 +139,8 @@ function Watermark({ children }: { children: string }) {
     </div>
   );
 }
+
+// ─── Map ─────────────────────────────────────────────────────────
 
 function MapPanel({
   pulses, selected, onSelect
@@ -269,23 +282,49 @@ function PulseList({
   );
 }
 
-function BuddyMatch({ buddies }: { buddies: Buddy[] }) {
-  const sorted = useMemo(() => [...buddies].sort((a,b) => b.match - a.match), [buddies]);
+// ─── Buddy ───────────────────────────────────────────────────────
+
+function BuddyMatch() {
+  const [buddies, setBuddies] = useState<Buddy[]>(FALLBACK_BUDDIES);
+  const [active, setActive] = useState<Buddy | null>(null);
+
+  useEffect(() => {
+    buddyApi.list().then(setBuddies).catch(() => setBuddies(FALLBACK_BUDDIES));
+  }, []);
+
+  const sorted = useMemo(
+    () => [...buddies].sort((a, b) => b.match_score - a.match_score),
+    [buddies]
+  );
+
   return (
-    <div className="grid sm:grid-cols-2 gap-4">
-      {sorted.map((b, i) => <BuddyCard key={b.id} buddy={b} index={i} />)}
-    </div>
+    <>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {sorted.map((b, i) => (
+          <BuddyCard key={b.id} buddy={b} index={i} onOpen={() => setActive(b)} />
+        ))}
+      </div>
+      <BuddyProfileModal
+        buddy={active}
+        open={!!active}
+        onClose={() => setActive(null)}
+      />
+    </>
   );
 }
 
-function BuddyCard({ buddy, index }: { buddy: Buddy; index: number }) {
-  const pct = Math.round(buddy.match * 100);
+function BuddyCard({
+  buddy, index, onOpen
+}: { buddy: Buddy; index: number; onOpen: () => void }) {
+  const pct = Math.round(buddy.match_score * 100);
   return (
-    <motion.div
+    <motion.button
+      layoutId={`buddy-${buddy.id}`}
+      onClick={onOpen}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06 }}
-      className="relative border border-cream/12 bg-cream/[0.025] rounded-3xl p-5 overflow-hidden backdrop-blur-md"
+      className="relative text-left border border-cream/12 bg-cream/[0.025] rounded-3xl p-5 overflow-hidden backdrop-blur-md group hover:bg-cream/[0.05] transition"
     >
       <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-cinnabar/12 blur-3xl pointer-events-none" />
 
@@ -298,8 +337,15 @@ function BuddyCard({ buddy, index }: { buddy: Buddy; index: number }) {
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <div className="relative w-12 h-12 rounded-2xl bg-cream text-ink grid place-items-center font-display font-bold">
-          {buddy.avatarSeed}
+        <div className="relative w-12 h-12 rounded-2xl bg-cream text-ink grid place-items-center font-display font-bold overflow-hidden">
+          <img
+            src={buddy.avatar}
+            alt={buddy.name}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+          <span className="relative">{buddy.name.split(/\s+/).slice(0,2).map(w => w[0]).join("")}</span>
           {buddy.online && (
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-ink" />
           )}
@@ -307,7 +353,7 @@ function BuddyCard({ buddy, index }: { buddy: Buddy; index: number }) {
         <div>
           <div className="font-display font-semibold text-cream text-lg leading-tight">{buddy.name}</div>
           <div className="font-serif italic text-cream/55 text-xs mt-0.5">
-            {buddy.country} · {buddy.university} · year {buddy.yearsInRussia + 1}
+            {buddy.country} · {buddy.university} · year {buddy.years_in_russia + 1}
           </div>
         </div>
       </div>
@@ -320,20 +366,15 @@ function BuddyCard({ buddy, index }: { buddy: Buddy; index: number }) {
         ))}
       </div>
 
-      <p className="mt-3 font-serif italic text-cream/55 text-sm leading-relaxed">
-        Matched on country, university overlap, and arrival cohort.
-        Verified by the international office.
+      <p className="mt-3 font-serif italic text-cream/55 text-sm leading-relaxed line-clamp-2">
+        {buddy.bio}
       </p>
 
-      <div className="mt-4 flex gap-2">
-        <button className="flex-1 px-4 py-2 rounded-full bg-cinnabar text-cream text-sm font-display font-semibold tracking-wide hover:brightness-110 transition">
-          Telegram →
-        </button>
-        <button className="px-4 py-2 rounded-full border border-cream/20 text-cream/85 text-sm font-display font-semibold tracking-wide hover:bg-cream/5 transition">
-          WhatsApp
-        </button>
+      <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-cream/45 group-hover:text-cinnabar transition">
+        <span>open profile</span>
+        <span className="transition-transform group-hover:translate-x-1">→</span>
       </div>
-    </motion.div>
+    </motion.button>
   );
 }
 
