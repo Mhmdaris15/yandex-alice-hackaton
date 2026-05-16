@@ -16,16 +16,16 @@ export function Hero() {
 
       {/* Side rails — magazine markers */}
       <div className="hidden md:flex flex-col gap-3 absolute left-6 top-1/2 -translate-y-1/2 z-10 text-cream/40 small-caps text-[10px]">
-        <span>N 55°45'</span>
+        <span>N 59°56'</span>
         <span className="w-px h-12 bg-cream/15 mx-auto" />
-        <span>Moscow</span>
+        <span>Saint Petersburg</span>
         <span className="w-px h-12 bg-cream/15 mx-auto" />
-        <span>E 37°37'</span>
+        <span>E 30°19'</span>
       </div>
       <div className="hidden md:flex flex-col gap-3 absolute right-6 top-1/2 -translate-y-1/2 z-10 text-cream/40 small-caps text-[10px]">
         <span>Vol. 01</span>
         <span className="w-px h-12 bg-cream/15 mx-auto" />
-        <span>2025</span>
+        <span>ITMO · 2025</span>
         <span className="w-px h-12 bg-cream/15 mx-auto" />
         <span>№ Alice</span>
       </div>
@@ -74,7 +74,37 @@ export function Hero() {
       <div className="absolute right-8 sm:right-20 top-28 z-10 pointer-events-none">
         <Stamp text="APPROVED" rotate={-12} />
       </div>
+
+      <Polaroid />
     </section>
+  );
+}
+
+function Polaroid() {
+  return (
+    <motion.div
+      className="hidden lg:block absolute right-12 bottom-20 z-10 pointer-events-none"
+      initial={{ opacity: 0, y: 60, rotate: -2 }}
+      animate={{ opacity: 1, y: 0, rotate: 4 }}
+      transition={{ delay: 0.4, type: "spring", stiffness: 80, damping: 16 }}
+    >
+      <div className="relative bg-cream p-2 pb-10 shadow-[0_24px_60px_-16px_rgba(0,0,0,0.6)] rotate-[3deg]">
+        <img
+          src="https://images.unsplash.com/photo-1556610961-2fecc5927173?w=320&q=80&auto=format&fit=crop"
+          alt="Saint Petersburg canal at dusk"
+          loading="lazy"
+          className="block w-[240px] h-[300px] object-cover grayscale-[0.15]"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://picsum.photos/seed/spb-canal/240/300?grayscale"; }}
+        />
+        <div className="absolute bottom-2 inset-x-2 text-center">
+          <span className="font-serif italic text-ink/60 text-xs">
+            Saint Petersburg, the morning Aris arrived.
+          </span>
+        </div>
+        {/* tape */}
+        <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-14 h-5 bg-cream/40 backdrop-blur-sm border border-cream/30" />
+      </div>
+    </motion.div>
   );
 }
 

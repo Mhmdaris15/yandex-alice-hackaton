@@ -43,8 +43,8 @@ export function Stamp({
         <text x="80" y="76" textAnchor="middle" fill="currentColor" fontFamily="Space Grotesk" fontWeight="800" fontSize="20" letterSpacing="2">
           {text}
         </text>
-        <text x="80" y="94" textAnchor="middle" fill="currentColor" fontFamily="JetBrains Mono" fontSize="8" letterSpacing="2">
-          МОСКВА · 2025
+        <text x="80" y="94" textAnchor="middle" fill="currentColor" fontFamily="JetBrains Mono" fontSize="7" letterSpacing="1.5">
+          САНКТ-ПЕТЕРБУРГ · 2025
         </text>
       </svg>
       <span

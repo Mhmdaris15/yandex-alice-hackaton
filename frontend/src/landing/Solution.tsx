@@ -59,7 +59,7 @@ export function Solution() {
             file no. 02 · solution protocol
           </span>
           <span className="font-serif italic text-ink/60 text-sm">
-            — drafted in Moscow, refined on the ground.
+            — drafted in Saint Petersburg, refined on the ground.
           </span>
         </div>
       </div>

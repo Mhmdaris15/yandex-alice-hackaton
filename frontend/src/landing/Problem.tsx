@@ -1,24 +1,43 @@
 import { motion } from "framer-motion";
 import { SectionIndex, Annotation, Marquee } from "./atoms";
 
-const SCENES = [
+interface Scene {
+  day: string;
+  headline: string;
+  body: string;
+  annotation: string;
+  image: string;
+  fallback: string;
+  alt: string;
+}
+
+const SCENES: Scene[] = [
   {
     day: "Day 03",
     headline: "The Migration Card",
     body: "You arrive with a 10×6 cm slip of paper that, if lost, can cost ₽5,000 and a deportation review. Nobody at the airport told you that.",
-    annotation: "in five years, no one has translated this clearly."
+    annotation: "in five years, no one has translated this clearly.",
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&q=80&auto=format&fit=crop",
+    fallback: "https://picsum.photos/seed/migration-card/600/400?grayscale",
+    alt: "Hands holding a stack of official paperwork"
   },
   {
     day: "Day 07",
     headline: "The Clinic with No English",
     body: "A mandatory medical exam at a clinic that operates between 09:00 and 11:30 only. You bring the wrong photo size. You come back.",
-    annotation: "queue 2h. lost half a day."
+    annotation: "queue 2h. lost half a day.",
+    image: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=600&q=80&auto=format&fit=crop",
+    fallback: "https://picsum.photos/seed/clinic-russia/600/400?grayscale",
+    alt: "Empty hospital corridor"
   },
   {
     day: "Day 14",
     headline: "The Form That Doesn't Exist Online",
-    body: "Form №2-Г — printed in one office in Lyublino, two metro lines away. You don't know it exists. The deadline is tomorrow.",
-    annotation: "this happens to ~40% of new arrivals."
+    body: "Form №2-Г — printed in one office two metro lines away. You don't know it exists. The deadline is tomorrow.",
+    annotation: "this happens to ~40% of new arrivals.",
+    image: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=600&q=80&auto=format&fit=crop",
+    fallback: "https://picsum.photos/seed/queue-line/600/400?grayscale",
+    alt: "A long queue of people waiting"
   }
 ];
 
@@ -66,7 +85,7 @@ export function Problem() {
   );
 }
 
-function ProblemCard({ scene, index }: { scene: typeof SCENES[number]; index: number }) {
+function ProblemCard({ scene, index }: { scene: Scene; index: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -75,6 +94,26 @@ function ProblemCard({ scene, index }: { scene: typeof SCENES[number]; index: nu
       transition={{ delay: index * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className="relative"
     >
+      {/* Editorial thumbnail */}
+      <div className="relative aspect-[4/3] mb-5 overflow-hidden rounded-md border border-cream/10">
+        <img
+          src={scene.image}
+          alt={scene.alt}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = scene.fallback; }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
+        <div className="absolute bottom-2 left-3 right-3 flex items-baseline justify-between text-cream/90">
+          <span className="font-mono text-[10px] tracking-[0.22em] text-cinnabar">
+            FILE · {scene.day.toUpperCase()}
+          </span>
+          <span className="font-mono text-[9px] tracking-[0.2em] text-cream/55">
+            UNSPLASH
+          </span>
+        </div>
+      </div>
+
       <div className="flex items-baseline gap-4">
         <span className="font-mono text-xs text-cinnabar tracking-[0.2em]">{scene.day}</span>
         <span className="h-px flex-1 bg-cream/15" />

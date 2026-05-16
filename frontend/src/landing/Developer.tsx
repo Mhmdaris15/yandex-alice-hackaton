@@ -1,22 +1,25 @@
 import { motion } from "framer-motion";
 import { SectionIndex, Stamp } from "./atoms";
 
-// ─── USER CONTRIBUTION: replace these with YOUR bio. ────────────────
+// Identity sourced from Aris's profile — swap the portrait URL if a real
+// headshot becomes available.
 const DEV = {
   name:        "Muhammad Aris",
   handle:      "@Mhmdaris15",
   role:        "Solo developer · designer · operator",
-  location:    "Built between Jakarta & Moscow",
-  bio:         "Builds things at the seam between AI and real human friction. Believes the best products feel like a friend you've been missing.",
+  location:    "ITMO University · Saint Petersburg",
+  origin:      "From Bogor, Indonesia · в России с 2024",
+  bio:         "Indonesian student at ITMO, building at the seam between AI and real human friction. He's lived this entire app — every queue, every form, every translation he couldn't read.",
+  portrait:    "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=480&q=80&auto=format&fit=crop",
   pillars: [
     { k: "Rust",         v: "axum · tokio · surrealdb" },
     { k: "React",        v: "tsx · gsap · framer · pwa" },
     { k: "AI",           v: "rag · ocr · speech · agents" }
   ],
   links: [
-    { label: "GitHub",   href: "https://github.com/Mhmdaris15" },
-    { label: "Telegram", href: "#" },
-    { label: "Email",    href: "mailto:analytics@demandlane.com" }
+    { label: "GitHub",   href: "https://github.com/Mhmdaris15", value: "github.com/Mhmdaris15" },
+    { label: "Telegram", href: "https://t.me/irazkisra",        value: "@irazkisra" },
+    { label: "Email",    href: "mailto:muhammadaris1945@gmail.com", value: "muhammadaris1945@gmail.com" }
   ]
 };
 
@@ -72,10 +75,17 @@ function PassportCard() {
       </div>
 
       <div className="mt-8 grid sm:grid-cols-[140px,1fr] gap-8 items-start">
-        {/* Avatar / mug shot */}
+        {/* Passport photo */}
         <div className="relative">
-          <div className="aspect-[3/4] rounded-md bg-gradient-to-br from-ink to-bg-rise grid place-items-center overflow-hidden border border-ink/15">
-            <span className="display-grotesk text-cream text-6xl">М</span>
+          <div className="relative aspect-[3/4] rounded-md overflow-hidden border border-ink/15 bg-ink">
+            <img
+              src={DEV.portrait}
+              alt={DEV.name}
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover grayscale contrast-110"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = "https://picsum.photos/seed/aris-itmo/240/320?grayscale"; }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ink/40" />
           </div>
           <div className="mt-2 font-mono text-[9px] tracking-[0.18em] text-ink/45 uppercase text-center">
             Photo · 35×45mm
@@ -84,10 +94,11 @@ function PassportCard() {
 
         {/* Identity */}
         <div>
-          <Field label="Full name" value={DEV.name} />
-          <Field label="Handle"    value={DEV.handle} mono />
-          <Field label="Role"      value={DEV.role} />
-          <Field label="Origin"    value={DEV.location} />
+          <Field label="Full name"  value={DEV.name} />
+          <Field label="Handle"     value={DEV.handle} mono />
+          <Field label="Role"       value={DEV.role} />
+          <Field label="Based in"   value={DEV.location} />
+          <Field label="Migration"  value={DEV.origin} />
 
           <div className="mt-5 font-serif italic text-ink/75 text-base leading-relaxed">
             "{DEV.bio}"
@@ -97,10 +108,10 @@ function PassportCard() {
 
       {/* Bottom MRZ-style line */}
       <div className="mt-8 border-t border-ink/15 pt-4 font-mono text-[10px] text-ink/45 tracking-[0.18em] uppercase break-all">
-        P&lt;MHMDARIS15&lt;&lt;ARIS&lt;&lt;&lt;BUILDS&lt;FIXERS&lt;FOR&lt;HUMANS&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+        P&lt;IDN&lt;MHMDARIS15&lt;&lt;ARIS&lt;&lt;&lt;ITMO&lt;UNIVERSITY&lt;SPB&lt;&lt;&lt;
       </div>
       <div className="mt-1 font-mono text-[10px] text-ink/45 tracking-[0.18em] uppercase">
-        WTR250516MAKER&lt;&lt;&lt;HACKATHON&lt;ALICE&lt;YANDEX&lt;&lt;
+        WTR250516MAKER&lt;&lt;&lt;HACKATHON&lt;ALICE&lt;YANDEX&lt;24H&lt;&lt;
       </div>
 
       {/* Stamp overlap */}
@@ -160,13 +171,13 @@ function StatsPanel() {
                 href={l.href}
                 target={l.href.startsWith("http") ? "_blank" : undefined}
                 rel="noreferrer"
-                className="group flex items-baseline justify-between py-2 border-b border-ink/10 last:border-b-0"
+                className="group flex items-baseline justify-between gap-3 py-2 border-b border-ink/10 last:border-b-0"
               >
-                <span className="font-display font-semibold text-ink group-hover:text-cinnabar transition">
+                <span className="font-display font-semibold text-ink group-hover:text-cinnabar transition shrink-0">
                   {l.label}
                 </span>
-                <span className="font-mono text-[11px] text-ink/40 group-hover:text-cinnabar transition">
-                  →
+                <span className="font-mono text-[10px] text-ink/45 group-hover:text-cinnabar transition truncate text-right">
+                  {l.value}
                 </span>
               </a>
             </li>
@@ -194,7 +205,7 @@ function SignatureFooter() {
         End of file · signed by the maker
       </span>
       <span className="font-serif italic text-ink/65 text-sm">
-        — М. Aris, fixer at large.
+        — М. Aris, ITMO · Saint Petersburg.
       </span>
     </div>
   );
